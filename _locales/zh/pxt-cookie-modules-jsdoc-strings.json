@@ -2,6 +2,7 @@
   "ModuleIndex": "Provides access to basic micro:bit functionality.",
   "cookieModules.displaySegNumber": "TODO: 显示数码管数值。",
   "cookieModules.readPmData": "TODO: 读取电位器值。",
+  "cookieModules.readSoilMoistureData": "TODO: 读取土壤湿度值。",
   "cookieModules.readTurbidityData": "TODO: 读取浊度值。",
   "cookieModules.readPhData": "TODO: 读取PH值。",
   "cookieModules.readDistance": "TODO: 读取超声波距离值。",

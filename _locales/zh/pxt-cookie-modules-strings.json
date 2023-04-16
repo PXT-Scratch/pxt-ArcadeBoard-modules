@@ -23,6 +23,7 @@
   "THMesure.temperature|block":"温度",
   "cookieModules.displaySegNumber|block": "控制数码管 %module 显示数值 %num",
   "cookieModules.readPmData|block": "读取电位器 %module 值",
+  "cookieModules.readSoilMoistureData|block": "读取土壤湿度 %module 值",
   "cookieModules.readTurbidityData|block":"读取浊度计 %module 值",
   "cookieModules.readPhData|block": "读取PH计 %module 值",
   "cookieModules.readDistance|block": "读取超声波 %module 距离(厘米)",

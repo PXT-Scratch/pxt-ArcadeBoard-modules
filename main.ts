@@ -1,7 +1,7 @@
-
 /**
- * Provides access to basic micro:bit functionality.
- */
+* 使用此文件来定义自定义函数和图形块。
+* 想了解更详细的信息，请前往 https://arcade.makecode.com/blocks/custom
+*/
 enum ModuleIndex {
     //% block="module1"
     Module1,
@@ -52,34 +52,36 @@ enum DigitalOutputIndex {
     //% block="HIGH"
     HIGH
 }
-enum THMesure{
+enum THMesure {
     //% block="humidity"
     humidity,
     //% block="temperature"
     temperature,
 }
-    function validate(str: String): Boolean { 
-        let isfloat = false;
-        let len = str.length;
-        if (len > 5) { 
-            return false;
-        }
-        for (let i = 0; i < len; i++) { 
-            if (str.charAt(i) == ".") { 
-                isfloat = true;
-                return true;
-            }
-        }
-        if (!isfloat && len == 5) { 
-            return false;
-        }
-        return true;
+function validate(str: String): Boolean {
+    let isfloat = false;
+    let len = str.length;
+    if (len > 5) {
+        return false;
     }
-
-//% color=190 weight=100 icon="\uf1ec" block="Cookie Modules"
+    for (let i = 0; i < len; i++) {
+        if (str.charAt(i) == ".") {
+            isfloat = true;
+            return true;
+        }
+    }
+    if (!isfloat && len == 5) {
+        return false;
+    }
+    return true;
+}
+/**
+ * Custom blocks
+ */
+//% weight=100 color=#FF9500 icon=""
 namespace cookieModules {
     const PM_ADDRESS = 0x26//电位器26-29//3031不好用
-    const SEG_ADDRESS = 0x32//数码管32-35//用电位器测
+    const SEG_ADDRESS = 0x32//数码管32-35
     const DigitalIn_ADDRESS = 0x36//单个//
     const DigitalOutPut_ADDRESS = 0x37//单个//
     const ADC_ADDRESS = 0x40//单个
@@ -87,6 +89,7 @@ namespace cookieModules {
     const HM_ADDRESS = 0x41//41-44
     const PH_ADDRESS = 0x45//45-48
     const TURBIDITY_ADDRESS = 0x52//52-55
+    const SOILMOISTURE_ADDRESS = 0x56//56-59
     //将字符串格式化为UTF8编码的字节
     let writeUTF = function (str: String, isGetBytes?: boolean) {
         let back = [];
@@ -168,7 +171,7 @@ namespace cookieModules {
                 }
                 j++;
             }
-            pins.i2cWriteBuffer(SEG_ADDRESS, buf);
+            pins.i2cWriteBuffer(SEG_ADDRESS + module, buf);
         }
     }
     /**
@@ -183,6 +186,21 @@ namespace cookieModules {
         let data;
         dataL = pins.i2cReadRegister(PM_ADDRESS + module, 0x01, NumberFormat.UInt8LE);
         dataH = pins.i2cReadRegister(PM_ADDRESS + module, 0x02, NumberFormat.UInt8LE);
+        data = dataL + dataH * 256;
+        return (data)
+    }
+    /**
+    * TODO: 读取土壤湿度值。
+    */
+    //% blockId=read_SoilMoisture block="read %module SoilMoisture data"
+    //% weight=65
+    export function readSoilMoistureData(module: ModuleIndex): number {
+        pins.i2cWriteRegister(SOILMOISTURE_ADDRESS + module, 0x00, 0x01);
+        let dataL;
+        let dataH;
+        let data;
+        dataL = pins.i2cReadRegister(SOILMOISTURE_ADDRESS + module, 0x01, NumberFormat.UInt8LE);
+        dataH = pins.i2cReadRegister(SOILMOISTURE_ADDRESS + module, 0x02, NumberFormat.UInt8LE);
         data = dataL + dataH * 256;
         return (data)
     }
@@ -239,7 +257,7 @@ namespace cookieModules {
      */
     //% blockId=read_hm block="read %module %TH value"
     //% weight=65
-    export function readTempHumidity(module: ModuleIndex,TH:THMesure): number {
+    export function readTempHumidity(module: ModuleIndex, TH: THMesure): number {
         pins.i2cWriteRegister(HM_ADDRESS + module, 0x00, 0x01);
         let dataL;
         let dataH;
@@ -250,7 +268,7 @@ namespace cookieModules {
             dataL = pins.i2cReadRegister(HM_ADDRESS + module, 0x01, NumberFormat.UInt8LE);
             dataH = pins.i2cReadRegister(HM_ADDRESS + module, 0x02, NumberFormat.UInt8LE);
             humidity = dataL + dataH * 256;
-            data = humidity / 10; 
+            data = humidity / 10;
         }
         if (TH == 1) {
             dataL = pins.i2cReadRegister(HM_ADDRESS + module, 0x03, NumberFormat.UInt8LE);
@@ -272,8 +290,7 @@ namespace cookieModules {
         let dataL;
         let dataH;
         let data;
-        if (index == 0)
-        {
+        if (index == 0) {
             dataL = pins.i2cReadRegister(ADC_ADDRESS, 0x01, NumberFormat.UInt8LE);
             dataH = pins.i2cReadRegister(ADC_ADDRESS, 0x02, NumberFormat.UInt8LE);
             data = dataL + dataH * 256;
@@ -306,31 +323,27 @@ namespace cookieModules {
     export function readDigitalData(Pin: DigitalInPinIndex): number {
         pins.i2cWriteRegister(DigitalIn_ADDRESS, 0x00, 0x01);
         let data;
-        if (Pin == 0)
-        {
+        if (Pin == 0) {
             data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x01, NumberFormat.UInt8LE);
         }
-        if (Pin == 1)
-        {
+        if (Pin == 1) {
             data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x02, NumberFormat.UInt8LE);
         }
-        if (Pin == 2)
-        {
+        if (Pin == 2) {
             data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x03, NumberFormat.UInt8LE);
         }
-        if (Pin == 3)
-        {
+        if (Pin == 3) {
             data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x04, NumberFormat.UInt8LE);
         }
         return (data);
     }
-    /**输出四路数字值。
+    /**
+    * TODO:输出四路数字值。
     * @param value describe value here, eg: 5
     */
     //% blockId=Digital_Output block="set %pin digital %state"
     //% weight=65
-    export function setDigitalOutput(Pin: DigitalOutputPinIndex, state: DigitalOutputIndex)
-    {
+    export function setDigitalOutput(Pin: DigitalOutputPinIndex, state: DigitalOutputIndex) {
         if (Pin == 0) {
             pins.i2cWriteRegister(DigitalOutPut_ADDRESS, Pin + 2, state);
         }
@@ -348,6 +361,6 @@ namespace cookieModules {
         }
         if (Pin == 5) {
             pins.i2cWriteRegister(DigitalOutPut_ADDRESS, Pin + 2, state);
-        }   
+        }
     }
 }
