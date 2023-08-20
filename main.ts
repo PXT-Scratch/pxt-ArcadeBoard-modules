@@ -20,19 +20,13 @@ enum ADCIndex {
     //% block="A3"
     CH3,
     //% block="A4"
-    CH4
+    CH4,
+    //% block="A5"
+    CH5,
+    //% block="A6"
+    CH6
 }
-enum DigitalInPinIndex {
-    //% block="1"
-    P10,
-    //% block="2"
-    P11,
-    //% block="3"
-    P16,
-    //% block="4"
-    P17
-}
-enum DigitalOutputPinIndex {
+enum DigitalPinIndex {
     //% block="1"
     P10,
     //% block="2"
@@ -42,9 +36,13 @@ enum DigitalOutputPinIndex {
     //% block="4"
     P17,
     //% block="5"
-    P35,
+    P34,
     //% block="6"
-    P36
+    P35,
+    //% block="7"
+    P36,
+    //% block="8"
+    P37
 }
 enum DigitalOutputIndex {
     //% block="LOW"
@@ -57,6 +55,16 @@ enum THMesure {
     humidity,
     //% block="temperature"
     temperature,
+}
+enum ServeIndex {
+    //% block="CH1"
+    CH1,
+    //% block="CH2"
+    CH2,
+    //% block="CH3"
+    CH3,
+    //% block="CH4"
+    CH4
 }
 function validate(str: String): Boolean {
     let isfloat = false;
@@ -81,15 +89,16 @@ function validate(str: String): Boolean {
 //% weight=100 color=#FF9500 icon=""
 namespace cookieModules {
     const PM_ADDRESS = 0x26//电位器26-29//3031不好用
-    const SEG_ADDRESS = 0x32//数码管32-35
+    const SEG_ADDRESS = 0x22//数码管22-25
     const DigitalIn_ADDRESS = 0x36//单个//
     const DigitalOutPut_ADDRESS = 0x37//单个//
     const ADC_ADDRESS = 0x40//单个
-    const SONAR_ADDRESS = 0x52//52-55//
     const HM_ADDRESS = 0x41//41-44
     const PH_ADDRESS = 0x45//45-48
     const TURBIDITY_ADDRESS = 0x52//52-55
     const SOILMOISTURE_ADDRESS = 0x56//56-59
+    const SERVE_ADDRESS = 0x60//56-59
+    const SONAR_ADDRESS = 0x61//61-64//
     //将字符串格式化为UTF8编码的字节
     let writeUTF = function (str: String, isGetBytes?: boolean) {
         let back = [];
@@ -280,7 +289,7 @@ namespace cookieModules {
     }
 
     /**
-    * TODO: 读取四路ADC值。
+    * TODO: 读取六路ADC值。
     * @param value describe value here, eg: 5
     */
     //% blockId=read_ad block="read %index adc value"
@@ -310,17 +319,27 @@ namespace cookieModules {
             dataH = pins.i2cReadRegister(ADC_ADDRESS, 0x08, NumberFormat.UInt8LE);
             data = dataL + dataH * 256;
         }
+        if (index == 4) {
+            dataL = pins.i2cReadRegister(ADC_ADDRESS, 0x09, NumberFormat.UInt8LE);
+            dataH = pins.i2cReadRegister(ADC_ADDRESS, 0x0A, NumberFormat.UInt8LE);
+            data = dataL + dataH * 256;
+        }
+        if (index == 5) {
+            dataL = pins.i2cReadRegister(ADC_ADDRESS, 0x0B, NumberFormat.UInt8LE);
+            dataH = pins.i2cReadRegister(ADC_ADDRESS, 0x0C, NumberFormat.UInt8LE);
+            data = dataL + dataH * 256;
+        }
         return (data);
     }
 
 
     /**
-    * TODO: 读取四路数字值。
+    * TODO: 读取八路数字值。
     * @param value describe value here, eg: 5
     */
     //% blockId=read_digital block="read %index digital value"
     //% weight=65
-    export function readDigitalData(Pin: DigitalInPinIndex): number {
+    export function readDigitalData(Pin: DigitalPinIndex): number {
         pins.i2cWriteRegister(DigitalIn_ADDRESS, 0x00, 0x01);
         let data;
         if (Pin == 0) {
@@ -335,15 +354,27 @@ namespace cookieModules {
         if (Pin == 3) {
             data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x04, NumberFormat.UInt8LE);
         }
+        if (Pin == 4) {
+            data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x05, NumberFormat.UInt8LE);
+        }
+        if (Pin == 5) {
+            data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x06, NumberFormat.UInt8LE);
+        }
+        if (Pin == 6) {
+            data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x07, NumberFormat.UInt8LE);
+        }
+        if (Pin == 7) {
+            data = pins.i2cReadRegister(DigitalIn_ADDRESS, 0x08, NumberFormat.UInt8LE);
+        }
         return (data);
     }
     /**
-    * TODO:输出四路数字值。
+    * TODO:输出八路数字值。
     * @param value describe value here, eg: 5
     */
     //% blockId=Digital_Output block="set %pin digital %state"
     //% weight=65
-    export function setDigitalOutput(Pin: DigitalOutputPinIndex, state: DigitalOutputIndex) {
+    export function setDigitalOutput(Pin: DigitalPinIndex, state: DigitalOutputIndex) {
         if (Pin == 0) {
             pins.i2cWriteRegister(DigitalOutPut_ADDRESS, Pin + 2, state);
         }
@@ -362,5 +393,34 @@ namespace cookieModules {
         if (Pin == 5) {
             pins.i2cWriteRegister(DigitalOutPut_ADDRESS, Pin + 2, state);
         }
+        if (Pin == 6) {
+            pins.i2cWriteRegister(DigitalOutPut_ADDRESS, Pin + 2, state);
+        }
+        if (Pin == 7) {
+            pins.i2cWriteRegister(DigitalOutPut_ADDRESS, Pin + 2, state);
+        }
     }
+    /**
+    * TODO:控制四路舵机。
+    * @param value describe value here, eg: 5
+    */
+    //% blockId=Serve_Output block="set %CH serve %angle"
+    //% angle.min=0 angle.max=180
+    //% weight=65
+    export function setServeOutput(CH: ServeIndex, angle: number) {
+        if (CH == 0) {
+            pins.i2cWriteRegister(SERVE_ADDRESS, CH + 2, angle);
+        }
+        if (CH == 1) {
+            pins.i2cWriteRegister(SERVE_ADDRESS, CH + 2, angle);
+        }
+        if (CH == 2) {
+            pins.i2cWriteRegister(SERVE_ADDRESS, CH + 2, angle);
+        }
+        if (CH == 3) {
+            pins.i2cWriteRegister(SERVE_ADDRESS, CH + 2, angle);
+        }
+        pause(100);
+    }
+
 }

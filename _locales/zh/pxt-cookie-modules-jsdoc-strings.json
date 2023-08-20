@@ -9,6 +9,7 @@
   "cookieModules.readTempHumidity": "TODO: 读取温湿度值。", 
   "cookieModules.readAdcData": "TODO: 读取四路ADC值。",
   "cookieModules.readDigitalData": "TODO: 读取四路数字值。",
-  "cookieModules.setDigitalOutput": "TODO: 输出四路数字值。"
+  "cookieModules.setDigitalOutput": "TODO: 输出四路数字值。",
+  "cookieModules.setServeOutput": "TODO: 控制四路舵机。"
   
 }
