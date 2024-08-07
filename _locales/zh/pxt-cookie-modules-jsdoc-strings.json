@@ -10,6 +10,11 @@
   "cookieModules.readAdcData": "TODO: 读取四路ADC值。",
   "cookieModules.readDigitalData": "TODO: 读取四路数字值。",
   "cookieModules.setDigitalOutput": "TODO: 输出四路数字值。",
-  "cookieModules.setServeOutput": "TODO: 控制四路舵机。"
+  "cookieModules.setServeOutput": "TODO: 控制四路舵机。",
+  "cookieModules.wifi_connect": "TODO: 连接wifi。",
+  "cookieModules.iot_connect": "TODO: 连接IOT平台。",
+  "cookieModules.readWifiData": "TODO: 读取wifi状态。",
+  "cookieModules.sendToTopic": "TODO: 向物联网平台的某个主题发送信息。",
+  "cookieModules.receiveFromTopic": "TODO: 从物联网平台的某个主题接收信息。"
   
 }

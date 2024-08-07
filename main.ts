@@ -88,17 +88,63 @@ function validate(str: String): Boolean {
  */
 //% weight=100 color=#FF9500 icon=""
 namespace cookieModules {
-    const PM_ADDRESS = 0x26//电位器26-29//3031不好用
     const SEG_ADDRESS = 0x22//数码管22-25
-    const DigitalIn_ADDRESS = 0x36//单个//
-    const DigitalOutPut_ADDRESS = 0x37//单个//
+    const PM_ADDRESS = 0x26//电位器26-29//3031不好用
+    //33-35
+    const DigitalIn_ADDRESS = 0x36//单个
+    const DigitalOutPut_ADDRESS = 0x37//单个
+    const Hall_ADDRESS = 0x38
+    const LineFinder_ADDRESS = 0x39
     const ADC_ADDRESS = 0x40//单个
     const HM_ADDRESS = 0x41//41-44
     const PH_ADDRESS = 0x45//45-48
     const TURBIDITY_ADDRESS = 0x52//52-55
     const SOILMOISTURE_ADDRESS = 0x56//56-59
-    const SERVE_ADDRESS = 0x60//56-59
-    const SONAR_ADDRESS = 0x61//61-64//
+    const SERVE_ADDRESS = 0x60
+    const SONAR_ADDRESS = 0x61//61-64
+    const IOT_ADDRESS = 0x65//65-68
+    const AIRPRESS_ADDRESS = 0x69
+
+    //负数处理，输入补码，字符串uint16ToBinaryString。
+    export function complementToDecimal(str: string) {
+        let binaryStr = str;//数字转为字符串
+        // 检查是否为负数（最高位为1）
+        if (binaryStr[0] === '1') {
+            // 转换为正数的补码：首先取反
+            let inverted = '';
+            for (let i = 0; i < binaryStr.length; i++) {
+                inverted += binaryStr[i] === '0' ? '1' : '0';
+            }
+            // 然后加1
+            let carry = 1;
+            let sum = '';
+            for (let i = inverted.length - 1; i >= 0; i--) {
+                let bitSum = parseInt(inverted[i]) + carry;
+                if (bitSum === 2) {
+                    sum = '0' + sum;
+                    carry = 1;
+                } else {
+                    sum = bitSum.toString() + sum;
+                    carry = 0;
+                }
+            }
+            // 将得到的正数二进制转换为十进制
+            let decimal = parseInt(sum, 2);
+            // 由于原数是负数，返回负的十进制值
+            return -decimal;
+        } else {
+            // 如果是正数，直接转换
+            return parseInt(binaryStr, 2);
+        }
+    }
+
+    export function uint16ToBinaryString(num: number) {
+        let binaryString = '';
+        for (let i = 15; i >= 0; i--) {
+            binaryString += (num & (1 << i)) ? '1' : '0';
+        }
+        return binaryString;
+    }
     //将字符串格式化为UTF8编码的字节
     let writeUTF = function (str: String, isGetBytes?: boolean) {
         let back = [];
@@ -125,7 +171,31 @@ namespace cookieModules {
             back[i] &= 0xff;
         }
         return back;
-
+    }
+    //将UTF8编码的字节格式化为字符串
+    function utf8BufferToStr(buffer: Buffer): string {
+        let out = "";
+        let i = 0;
+        const len = buffer.length;
+        while (i < len) {
+            let c = buffer.getUint8(i++);
+            if (c >> 4 <= 7) {
+                // 0xxxxxxx
+                out += String.fromCharCode(c);
+            } else if (c >> 4 === 12 || c >> 4 === 13) {
+                // 110x xxxx   10xx xxxx
+                let char2 = buffer.getUint8(i++);
+                out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
+            } else if (c >> 4 === 14) {
+                // 1110 xxxx  10xx xxxx  10xx xxxx
+                let char2 = buffer.getUint8(i++);
+                let char3 = buffer.getUint8(i++);
+                out += String.fromCharCode(((c & 0x0F) << 12) |
+                    ((char2 & 0x3F) << 6) |
+                    ((char3 & 0x3F) << 0));
+            }
+        }
+        return out;
     }
     //限幅
     function constract(val: number, minVal: number, maxVal: number): number {
@@ -155,6 +225,109 @@ namespace cookieModules {
         return true;
     }
     /**
+    * TODO: 连接wifi。
+    */
+    //% blockId=wifi_connect block="WIFI %module SSID %username password %password"
+    //% weight=65
+    export function wifi_connect(module: ModuleIndex, username: string, password: string) {
+        // 将标识符添加到字符串的前面
+        const combinedUsernameString = "urn_" + username;
+        const combinedPasswordString = "psw_" + password;
+        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
+        const utf8BytesUsername = writeUTF(combinedUsernameString);
+        const utf8BytesPassword = writeUTF(combinedPasswordString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufUsername = pins.createBufferFromArray(utf8BytesUsername);
+        let bufPassword = pins.createBufferFromArray(utf8BytesPassword);
+        // 使用 I2C 发送缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufUsername);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufPassword);
+    }
+    /**
+    * TODO: 连接IOT平台。
+    */
+    //% blockId=iot_connect block="IOT %module username %username password %password project %project"
+    //% weight=65
+    export function iot_connect(module: ModuleIndex, username: string, password: string, project: string) {
+        // 将标识符添加到字符串的前面
+        const combinedUsernameString = "mqu_" + username;
+        const combinedPasswordString = "mqp_" + password;
+        const combinedProjectString = "pro_" + project;
+        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
+        const utf8BytesUsername = writeUTF(combinedUsernameString);
+        const utf8BytesPassword = writeUTF(combinedPasswordString);
+        const utf8BytesProject = writeUTF(combinedProjectString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufUsername = pins.createBufferFromArray(utf8BytesUsername);
+        let bufPassword = pins.createBufferFromArray(utf8BytesPassword);
+        let bufProject = pins.createBufferFromArray(utf8BytesProject);
+        // 使用 I2C 发送缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufUsername);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufPassword);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufProject);
+    }
+    /**
+    * TODO: 读取wifi状态。
+    */
+    //% blockId=read_wifi_stat block="read %module wifi stat"
+    //% weight=65
+    export function readWifiData(module: ModuleIndex): number {
+        let data = pins.i2cReadRegister(SEG_ADDRESS + module, 0x2a, NumberFormat.UInt8LE);
+        return data;
+    }
+
+    /**
+    * TODO: 向物联网平台的某个主题发送信息。
+    */
+    //% blockId=send_to_topic block="send %module message %message to topic %topic"
+    //% weight=65
+    export function sendToTopic(module: ModuleIndex, message: string, topic: string) {
+        // 将标识符添加到字符串的前面
+        const combinedMessageString = "msg_" + message;
+        const combinedTopicString = "tpc_" + topic;
+        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
+        const utf8BytesMessage = writeUTF(combinedMessageString);
+        const utf8BytesTopic = writeUTF(combinedTopicString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufMessage = pins.createBufferFromArray(utf8BytesMessage);
+        let bufTopic = pins.createBufferFromArray(utf8BytesTopic);
+        // 使用 I2C 发送缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufTopic);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufMessage);
+        
+    }
+
+    /**
+     * TODO: 从物联网平台的某个主题接收信息。
+     */
+    //% blockId=receive_from_topic block="receive %module message from topic %topic"
+    //% weight=65
+    export function receiveFromTopic(module: ModuleIndex, topic: string): string {
+        // 将标识符添加到字符串的前面
+        const combinedsTopicString = "spc_" + topic;
+        const utf8BytesTopic = writeUTF(combinedsTopicString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufsTopic = pins.createBufferFromArray(utf8BytesTopic);
+        // 使用 I2C 发送主题缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufsTopic);
+        // 假设数据长度在一个特定寄存器中（例如：0x2b）
+        let length = pins.i2cReadRegister(IOT_ADDRESS + module, 0x2b, NumberFormat.UInt8LE);
+        // 创建缓冲区以读取字符串数据
+        let buf = pins.createBuffer(length);
+        // 将缓冲区转换为字符串
+        for (let i = 0; i < length; i++) {
+            const combinedMessageString = "ren_" + i;
+            const utf8BytesMessage = writeUTF(combinedMessageString);
+            let bufMessage = pins.createBufferFromArray(utf8BytesMessage);
+            pins.i2cWriteBuffer(IOT_ADDRESS + module, bufMessage);
+            buf[i] = pins.i2cReadNumber(IOT_ADDRESS + module, NumberFormat.UInt8LE);
+        }
+        let result = "";
+        result = utf8BufferToStr(buf);
+        return result;
+    }
+
+    /**
      * TODO: 显示数码管数值。
      */
     //% blockId=display_seg_number block="control seg %module display number %num"
@@ -183,6 +356,7 @@ namespace cookieModules {
             pins.i2cWriteBuffer(SEG_ADDRESS + module, buf);
         }
     }
+
     /**
     * TODO: 读取电位器值。
     */
@@ -331,8 +505,6 @@ namespace cookieModules {
         }
         return (data);
     }
-
-
     /**
     * TODO: 读取八路数字值。
     * @param value describe value here, eg: 5
@@ -422,5 +594,4 @@ namespace cookieModules {
         }
         pause(100);
     }
-
 }

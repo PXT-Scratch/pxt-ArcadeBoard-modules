@@ -39,7 +39,11 @@
   "cookieModules.readAdcData|block": "读取模拟采集拓展板引脚 %index ADC采集值",
   "cookieModules.readDigitalData|block": "读取数字采集拓展板引脚 %index 状态",
   "cookieModules.setDigitalOutput|block": "设置数字输出拓展板引脚 %pin 状态 %state",
-  "cookieModules.setServeOutput|block": "设置 %CH 角度 %angle",
+  "cookieModules.wifi_connect|block": "设置WIFI %module SSID %username 密码 %password",
+  "cookieModules.iot_connect|block": "设置IOT基本信息 %module 用户名 %username 密码 %password 项目 %project",
+  "cookieModules.readWifiData|block": "读取 %module wifi状态",
+  "cookieModules.sendToTopic|block": "向IOT %module 发送信息 %message 到主题 %topic",
+  "cookieModules.receiveFromTopic|block": "从IOT %module 主题 %topic 接受信息",
   "cookieModules|block": "cookie 外设",
   "{id:category}CookieModules": "cookie 基础扩展"
 }
