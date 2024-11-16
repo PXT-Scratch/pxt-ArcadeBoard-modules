@@ -87,6 +87,7 @@ function validate(str: String): Boolean {
  * Custom blocks
  */
 //% weight=100 color=#FF9500 icon=""
+//% groups="['基础传感器', '人工智能传感器']"
 namespace cookieModules {
     const SEG_ADDRESS = 0x22//数码管22-25
     const PM_ADDRESS = 0x26//电位器26-29//3031不好用
@@ -225,113 +226,11 @@ namespace cookieModules {
         return true;
     }
     /**
-    * TODO: 连接wifi。
-    */
-    //% blockId=wifi_connect block="WIFI %module SSID %username password %password"
-    //% weight=65
-    export function wifi_connect(module: ModuleIndex, username: string, password: string) {
-        // 将标识符添加到字符串的前面
-        const combinedUsernameString = "urn_" + username;
-        const combinedPasswordString = "psw_" + password;
-        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
-        const utf8BytesUsername = writeUTF(combinedUsernameString);
-        const utf8BytesPassword = writeUTF(combinedPasswordString);
-        // 创建缓冲区并写入 UTF-8 编码字节
-        let bufUsername = pins.createBufferFromArray(utf8BytesUsername);
-        let bufPassword = pins.createBufferFromArray(utf8BytesPassword);
-        // 使用 I2C 发送缓冲区
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufUsername);
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufPassword);
-    }
-    /**
-    * TODO: 连接IOT平台。
-    */
-    //% blockId=iot_connect block="IOT %module username %username password %password project %project"
-    //% weight=65
-    export function iot_connect(module: ModuleIndex, username: string, password: string, project: string) {
-        // 将标识符添加到字符串的前面
-        const combinedUsernameString = "mqu_" + username;
-        const combinedPasswordString = "mqp_" + password;
-        const combinedProjectString = "pro_" + project;
-        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
-        const utf8BytesUsername = writeUTF(combinedUsernameString);
-        const utf8BytesPassword = writeUTF(combinedPasswordString);
-        const utf8BytesProject = writeUTF(combinedProjectString);
-        // 创建缓冲区并写入 UTF-8 编码字节
-        let bufUsername = pins.createBufferFromArray(utf8BytesUsername);
-        let bufPassword = pins.createBufferFromArray(utf8BytesPassword);
-        let bufProject = pins.createBufferFromArray(utf8BytesProject);
-        // 使用 I2C 发送缓冲区
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufUsername);
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufPassword);
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufProject);
-    }
-    /**
-    * TODO: 读取wifi状态。
-    */
-    //% blockId=read_wifi_stat block="read %module wifi stat"
-    //% weight=65
-    export function readWifiData(module: ModuleIndex): number {
-        let data = pins.i2cReadRegister(SEG_ADDRESS + module, 0x2a, NumberFormat.UInt8LE);
-        return data;
-    }
-
-    /**
-    * TODO: 向物联网平台的某个主题发送信息。
-    */
-    //% blockId=send_to_topic block="send %module message %message to topic %topic"
-    //% weight=65
-    export function sendToTopic(module: ModuleIndex, message: string, topic: string) {
-        // 将标识符添加到字符串的前面
-        const combinedMessageString = "msg_" + message;
-        const combinedTopicString = "tpc_" + topic;
-        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
-        const utf8BytesMessage = writeUTF(combinedMessageString);
-        const utf8BytesTopic = writeUTF(combinedTopicString);
-        // 创建缓冲区并写入 UTF-8 编码字节
-        let bufMessage = pins.createBufferFromArray(utf8BytesMessage);
-        let bufTopic = pins.createBufferFromArray(utf8BytesTopic);
-        // 使用 I2C 发送缓冲区
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufTopic);
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufMessage);
-        
-    }
-
-    /**
-     * TODO: 从物联网平台的某个主题接收信息。
-     */
-    //% blockId=receive_from_topic block="receive %module message from topic %topic"
-    //% weight=65
-    export function receiveFromTopic(module: ModuleIndex, topic: string): string {
-        // 将标识符添加到字符串的前面
-        const combinedsTopicString = "spc_" + topic;
-        const utf8BytesTopic = writeUTF(combinedsTopicString);
-        // 创建缓冲区并写入 UTF-8 编码字节
-        let bufsTopic = pins.createBufferFromArray(utf8BytesTopic);
-        // 使用 I2C 发送主题缓冲区
-        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufsTopic);
-        // 假设数据长度在一个特定寄存器中（例如：0x2b）
-        let length = pins.i2cReadRegister(IOT_ADDRESS + module, 0x2b, NumberFormat.UInt8LE);
-        // 创建缓冲区以读取字符串数据
-        let buf = pins.createBuffer(length);
-        // 将缓冲区转换为字符串
-        for (let i = 0; i < length; i++) {
-            const combinedMessageString = "ren_" + i;
-            const utf8BytesMessage = writeUTF(combinedMessageString);
-            let bufMessage = pins.createBufferFromArray(utf8BytesMessage);
-            pins.i2cWriteBuffer(IOT_ADDRESS + module, bufMessage);
-            buf[i] = pins.i2cReadNumber(IOT_ADDRESS + module, NumberFormat.UInt8LE);
-        }
-        let result = "";
-        result = utf8BufferToStr(buf);
-        return result;
-    }
-
-    /**
      * TODO: 显示数码管数值。
      */
     //% blockId=display_seg_number block="control seg %module display number %num"
     //% weight=65
+    //% group="基础传感器"
     export function displaySegNumber(module: ModuleIndex, num: number) {
         let buf = pins.createBuffer(4);
         buf[0] = 0;
@@ -362,6 +261,7 @@ namespace cookieModules {
     */
     //% blockId=read_pm block="read %module pm data"
     //% weight=65
+    //% group="基础传感器"
     export function readPmData(module: ModuleIndex): number {
         pins.i2cWriteRegister(PM_ADDRESS + module, 0x00, 0x01);
         let dataL;
@@ -377,6 +277,7 @@ namespace cookieModules {
     */
     //% blockId=read_SoilMoisture block="read %module SoilMoisture data"
     //% weight=65
+    //% group="基础传感器"
     export function readSoilMoistureData(module: ModuleIndex): number {
         pins.i2cWriteRegister(SOILMOISTURE_ADDRESS + module, 0x00, 0x01);
         let dataL;
@@ -392,6 +293,7 @@ namespace cookieModules {
     */
     //% blockId=read_turbidity block="read %module turbidity data"
     //% weight=65
+    //% group="基础传感器"
     export function readTurbidityData(module: ModuleIndex): number {
         pins.i2cWriteRegister(TURBIDITY_ADDRESS + module, 0x00, 0x01);
         let dataL;
@@ -407,6 +309,7 @@ namespace cookieModules {
     */
     //% blockId=read_ph block="read %module ph data"
     //% weight=65
+    //% group="基础传感器"
     export function readPhData(module: ModuleIndex): number {
         pins.i2cWriteRegister(PH_ADDRESS + module, 0x00, 0x01);
         let dataL;
@@ -423,6 +326,7 @@ namespace cookieModules {
     */
     //% blockId=read_Distance block="read %module SonarDistance data"
     //% weight=65
+    //% group="基础传感器"
     export function readDistance(module: ModuleIndex): number {
         pins.i2cWriteRegister(SONAR_ADDRESS + module, 0x00, 0x01);
         let dataL;
@@ -436,10 +340,10 @@ namespace cookieModules {
     }
     /**
      * TODO: 读取温湿度值。
-     * @param value describe value here, eg: 5
      */
     //% blockId=read_hm block="read %module %TH value"
     //% weight=65
+    //% group="基础传感器"
     export function readTempHumidity(module: ModuleIndex, TH: THMesure): number {
         pins.i2cWriteRegister(HM_ADDRESS + module, 0x00, 0x01);
         let dataL;
@@ -464,10 +368,10 @@ namespace cookieModules {
 
     /**
     * TODO: 读取六路ADC值。
-    * @param value describe value here, eg: 5
     */
     //% blockId=read_ad block="read %index adc value"
     //% weight=65
+    //% group="基础传感器"
     export function readAdcData(index: ADCIndex): number {
         pins.i2cWriteRegister(ADC_ADDRESS, 0x00, 0x01);
         let dataL;
@@ -507,10 +411,10 @@ namespace cookieModules {
     }
     /**
     * TODO: 读取八路数字值。
-    * @param value describe value here, eg: 5
     */
     //% blockId=read_digital block="read %index digital value"
     //% weight=65
+    //% group="基础传感器"
     export function readDigitalData(Pin: DigitalPinIndex): number {
         pins.i2cWriteRegister(DigitalIn_ADDRESS, 0x00, 0x01);
         let data;
@@ -542,10 +446,10 @@ namespace cookieModules {
     }
     /**
     * TODO:输出八路数字值。
-    * @param value describe value here, eg: 5
     */
     //% blockId=Digital_Output block="set %pin digital %state"
     //% weight=65
+    //% group="基础传感器"
     export function setDigitalOutput(Pin: DigitalPinIndex, state: DigitalOutputIndex) {
         if (Pin == 0) {
             pins.i2cWriteRegister(DigitalOutPut_ADDRESS, Pin + 2, state);
@@ -574,11 +478,11 @@ namespace cookieModules {
     }
     /**
     * TODO:控制四路舵机。
-    * @param value describe value here, eg: 5
     */
     //% blockId=Serve_Output block="set %CH serve %angle"
     //% angle.min=0 angle.max=180
     //% weight=65
+    //% group="基础传感器"
     export function setServeOutput(CH: ServeIndex, angle: number) {
         if (CH == 0) {
             pins.i2cWriteRegister(SERVE_ADDRESS, CH + 2, angle);
@@ -593,5 +497,112 @@ namespace cookieModules {
             pins.i2cWriteRegister(SERVE_ADDRESS, CH + 2, angle);
         }
         pause(100);
+    }
+    /**
+    * TODO: 连接wifi。
+    */
+    //% blockId=wifi_connect block="WIFI %module SSID %username password %password"
+    //% weight=65
+    //% group="人工智能传感器"
+    export function wifi_connect(module: ModuleIndex, username: string, password: string) {
+        // 将标识符添加到字符串的前面
+        const combinedUsernameString = "urn_" + username;
+        const combinedPasswordString = "psw_" + password;
+        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
+        const utf8BytesUsername = writeUTF(combinedUsernameString);
+        const utf8BytesPassword = writeUTF(combinedPasswordString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufUsername = pins.createBufferFromArray(utf8BytesUsername);
+        let bufPassword = pins.createBufferFromArray(utf8BytesPassword);
+        // 使用 I2C 发送缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufUsername);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufPassword);
+    }
+    /**
+    * TODO: 连接IOT平台。
+    */
+    //% blockId=iot_connect block="IOT %module username %username password %password project %project"
+    //% weight=65
+    //% group="人工智能传感器"
+    export function iot_connect(module: ModuleIndex, username: string, password: string, project: string) {
+        // 将标识符添加到字符串的前面
+        const combinedUsernameString = "mqu_" + username;
+        const combinedPasswordString = "mqp_" + password;
+        const combinedProjectString = "pro_" + project;
+        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
+        const utf8BytesUsername = writeUTF(combinedUsernameString);
+        const utf8BytesPassword = writeUTF(combinedPasswordString);
+        const utf8BytesProject = writeUTF(combinedProjectString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufUsername = pins.createBufferFromArray(utf8BytesUsername);
+        let bufPassword = pins.createBufferFromArray(utf8BytesPassword);
+        let bufProject = pins.createBufferFromArray(utf8BytesProject);
+        // 使用 I2C 发送缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufUsername);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufPassword);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufProject);
+    }
+    /**
+    * TODO: 读取wifi状态。
+    */
+    //% blockId=read_wifi_stat block="read %module wifi stat"
+    //% weight=65
+    //% group="人工智能传感器"
+    export function readWifiData(module: ModuleIndex): number {
+        let data = pins.i2cReadRegister(IOT_ADDRESS + module, 0x2a, NumberFormat.UInt8LE);
+        return data;
+    }
+
+    /**
+    * TODO: 向物联网平台的某个主题发送信息。
+    */
+    //% blockId=send_to_topic block="send %module message %message to topic %topic"
+    //% weight=65
+    //% group="人工智能传感器"
+    export function sendToTopic(module: ModuleIndex, message: string, topic: string) {
+        // 将标识符添加到字符串的前面
+        const combinedMessageString = "msg_" + message;
+        const combinedTopicString = "tpc_" + topic;
+        // 将带有标识符的字符串转换为 UTF-8 编码字节数组
+        const utf8BytesMessage = writeUTF(combinedMessageString);
+        const utf8BytesTopic = writeUTF(combinedTopicString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufMessage = pins.createBufferFromArray(utf8BytesMessage);
+        let bufTopic = pins.createBufferFromArray(utf8BytesTopic);
+        // 使用 I2C 发送缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufTopic);
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufMessage);
+        
+    }
+
+    /**
+     * TODO: 从物联网平台的某个主题接收信息。
+     */
+    //% blockId=receive_from_topic block="receive %module message from topic %topic"
+    //% weight=65
+    //% group="人工智能传感器"
+    export function receiveFromTopic(module: ModuleIndex, topic: string): string {
+        // 将标识符添加到字符串的前面
+        const combinedsTopicString = "spc_" + topic;
+        const utf8BytesTopic = writeUTF(combinedsTopicString);
+        // 创建缓冲区并写入 UTF-8 编码字节
+        let bufsTopic = pins.createBufferFromArray(utf8BytesTopic);
+        // 使用 I2C 发送主题缓冲区
+        pins.i2cWriteBuffer(IOT_ADDRESS + module, bufsTopic);
+        // 假设数据长度在一个特定寄存器中（例如：0x2b）
+        let length = pins.i2cReadRegister(IOT_ADDRESS + module, 0x2b, NumberFormat.UInt8LE);
+        // 创建缓冲区以读取字符串数据
+        let buf = pins.createBuffer(length);
+        // 将缓冲区转换为字符串
+        for (let i = 0; i < length; i++) {
+            const combinedMessageString = "ren_" + i;
+            const utf8BytesMessage = writeUTF(combinedMessageString);
+            let bufMessage = pins.createBufferFromArray(utf8BytesMessage);
+            pins.i2cWriteBuffer(IOT_ADDRESS + module, bufMessage);
+            buf[i] = pins.i2cReadNumber(IOT_ADDRESS + module, NumberFormat.UInt8LE);
+        }
+        let result = "";
+        result = utf8BufferToStr(buf);
+        return result;
     }
 }
