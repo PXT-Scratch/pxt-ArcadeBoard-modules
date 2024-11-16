@@ -502,7 +502,7 @@ namespace cookieModules {
     * TODO: 连接wifi。
     */
     //% blockId=wifi_connect block="WIFI %module SSID %username password %password"
-    //% weight=65
+    //% weight=65 color=#AB82FF
     //% group="人工智能传感器"
     export function wifi_connect(module: ModuleIndex, username: string, password: string) {
         // 将标识符添加到字符串的前面
@@ -522,7 +522,7 @@ namespace cookieModules {
     * TODO: 连接IOT平台。
     */
     //% blockId=iot_connect block="IOT %module username %username password %password project %project"
-    //% weight=65
+    //% weight=65 color=#AB82FF
     //% group="人工智能传感器"
     export function iot_connect(module: ModuleIndex, username: string, password: string, project: string) {
         // 将标识符添加到字符串的前面
@@ -546,7 +546,7 @@ namespace cookieModules {
     * TODO: 读取wifi状态。
     */
     //% blockId=read_wifi_stat block="read %module wifi stat"
-    //% weight=65
+    //% weight=65 color=#AB82FF
     //% group="人工智能传感器"
     export function readWifiData(module: ModuleIndex): number {
         let data = pins.i2cReadRegister(IOT_ADDRESS + module, 0x2a, NumberFormat.UInt8LE);
@@ -557,7 +557,7 @@ namespace cookieModules {
     * TODO: 向物联网平台的某个主题发送信息。
     */
     //% blockId=send_to_topic block="send %module message %message to topic %topic"
-    //% weight=65
+    //% weight=65 color=#AB82FF
     //% group="人工智能传感器"
     export function sendToTopic(module: ModuleIndex, message: string, topic: string) {
         // 将标识符添加到字符串的前面
@@ -579,7 +579,7 @@ namespace cookieModules {
      * TODO: 从物联网平台的某个主题接收信息。
      */
     //% blockId=receive_from_topic block="receive %module message from topic %topic"
-    //% weight=65
+    //% weight=65 color=#AB82FF
     //% group="人工智能传感器"
     export function receiveFromTopic(module: ModuleIndex, topic: string): string {
         // 将标识符添加到字符串的前面
