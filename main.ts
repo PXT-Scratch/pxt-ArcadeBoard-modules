@@ -88,7 +88,7 @@ function validate(str: String): Boolean {
  */
 //% weight=100 color=#FF9500 icon=""
 //% groups="['基础传感器', '人工智能传感器']"
-namespace ArcadeBoardModules {
+namespace cookieModules {
     const SEG_ADDRESS = 0x22//数码管22-25
     const PM_ADDRESS = 0x26//电位器26-29//3031不好用
     //33-35

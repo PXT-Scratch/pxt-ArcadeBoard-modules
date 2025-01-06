@@ -1,5 +1,5 @@
 {
-    "name": "pxt-ArcadeBoard-modules",
+    "name": "pxt-cookie-modules",
     "version": "0.0.1",
     "description": "",
     "dependencies": {
@@ -8,8 +8,8 @@
     "files": [
         "README.md",
         "main.ts",
-        "_locales/zh/pxt-ArcadeBoard-modules-strings.json",
-        "_locales/zh/pxt-ArcadeBoard-modules-jsdoc-strings.json"
+        "_locales/zh/pxt-cookie-modules-strings.json",
+        "_locales/zh/pxt-cookie-modules-jsdoc-strings.json"
     ],
     "testFiles": [
         "test.ts"
