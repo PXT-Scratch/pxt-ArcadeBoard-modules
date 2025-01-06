@@ -45,6 +45,6 @@
   "cookieModules.readWifiData|block": "读取 %module wifi状态",
   "cookieModules.sendToTopic|block": "向IOT %module 发送信息 %message 到主题 %topic",
   "cookieModules.receiveFromTopic|block": "从IOT %module 主题 %topic 接受信息",
-  "cookieModules|block": "cookie 外设",
-  "{id:category}CookieModules": "cookie 基础扩展"
+  "cookieModules|block": "ArcadeBoard 外设",
+  "{id:category}CookieModules": "ArcadeBoard 基础扩展"
 }
